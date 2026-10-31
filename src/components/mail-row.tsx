@@ -42,6 +42,15 @@ export const MailRow = ({ mail, onToggleStar, onArchive }: MailRowProps) => {
   const theme = useTheme()
   const weight = mail.unread ? '700' : '400'
   const rowBackground = mail.alert ? theme.alertBackground : theme.background
+  const subjectColor = mail.alert ? theme.alertText : theme.text
+  // 読み上げ用のラベル。未読・重要な通知であることを先に伝える
+  const accessibilityLabel = [
+    mail.unread && '未読',
+    mail.alert && '重要な通知',
+    mail.fromName,
+    mail.subject,
+    mail.date,
+  ].filter(Boolean).join('、')
 
   return (
     <ReanimatedSwipeable
@@ -56,7 +65,7 @@ export const MailRow = ({ mail, onToggleStar, onArchive }: MailRowProps) => {
           <Pressable
             style={styles.main}
             accessibilityRole="link"
-            accessibilityLabel={`${mail.unread ? '未読、' : ''}${mail.alert ? '重要な通知、' : ''}${mail.fromName}、${mail.subject}、${mail.date}`}
+            accessibilityLabel={accessibilityLabel}
           >
             {mail.alert ? (
               <View style={[styles.alertIcon, { borderColor: theme.alertText }]}>
@@ -73,7 +82,7 @@ export const MailRow = ({ mail, onToggleStar, onArchive }: MailRowProps) => {
                 </Text>
                 <Text style={[styles.date, { color: mail.unread ? theme.text : theme.textMuted }]}>{mail.date}</Text>
               </View>
-              <Text style={[styles.subject, { color: mail.alert ? theme.alertText : theme.text, fontWeight: weight }]} numberOfLines={1}>
+              <Text style={[styles.subject, { color: subjectColor, fontWeight: weight }]} numberOfLines={1}>
                 {mail.subject}
               </Text>
               <Text style={[styles.preview, { color: theme.textSecondary }]} numberOfLines={1}>

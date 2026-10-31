@@ -1,0 +1,55 @@
+# macOS
+.DS_Store
+
+# エディタ
+.vscode/
+.idea/
+*.swp
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# React Native のネイティブビルド（Expo の prebuild で生成）
+/ios
+/android
+
+# Expo / React Native のビルド成果物・署名鍵
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Metro
+.metro-health-check*
+
+# TypeScript
+*.tsbuildinfo
+
+# Cloudflare (wrangler)
+.wrangler/
+.dev.vars*
+
+# 環境変数・秘密情報（トークンや API キーをコミットしない）
+.env
+.env*.local
+.env.*
+!.env.example
+
+# Ruby バックエンド（導入時に備えて）
+.bundle/
+vendor/bundle/
+log/
+tmp/
+coverage/

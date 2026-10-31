@@ -73,14 +73,10 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
 
-      # ブラウザ本体はキャッシュにあれば取得を省く。OS 側の依存パッケージは毎回入れる
+      # ブラウザ本体はキャッシュにあれば取得を省く。OS 側の依存パッケージは、キャッシュがないときだけ入れる
       - name: E2E 用のブラウザを入れる
         if: steps.browsers.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
-
-      - name: E2E 用の OS 側の依存パッケージを入れる
-        if: steps.browsers.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium
 
       - name: E2E テスト
         run: npx playwright test

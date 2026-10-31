@@ -107,7 +107,7 @@ Web プロトタイプは GitHub Pages で公開しています: <https://nagata
 | 公開先 | GitHub Pages（`main` への push で自動公開、`/gmail-redesign/` 以下）と Cloudflare Workers の静的アセット配信（`wrangler.jsonc`） |
 | テスト | Node 標準のテスト（`node --test`）。画面に依存しない関数（絞り込み・検索、宛先の形式チェック、返信・転送の初期値、取り消しでの並び順の復元）とダミーデータを検証する |
 | E2E テスト | [Playwright](https://playwright.dev/)（Chromium、Pixel 7 の画面サイズ）。書き出した Web 版を実際にブラウザで操作し、絞り込み・検索、メール詳細、アーカイブと取り消し、メール作成（宛先の形式チェック、差出人の切り替え、破棄の確認、返信）を確認する |
-| CI | GitHub Actions で型チェック・lint・テスト・Web ビルド・E2E テストを順に実行（`.github/workflows/ci.yml`） |
+| CI | GitHub Actions で型チェック・lint・テスト・Web ビルド・E2E テストを順に実行。依存パッケージ・Web ビルドの変換結果・E2E 用のブラウザはキャッシュして実行時間を短くする（`.github/workflows/ci.yml`） |
 | バックエンド | 現在はなし。通知などが必要になった段階で Ruby で用意する予定（Cloudflare 以外に配置） |
 
 ```sh

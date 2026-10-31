@@ -18,6 +18,9 @@ jobs:
     name: 型チェック・lint・テスト・Web ビルド・E2E
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      # Expo（Metro）の変換結果の置き場。キャッシュとして次の実行に引き継ぐ
+      EXPO_METRO_CACHE_OUTPUT_DIR: ${{ runner.temp }}/metro-cache
     steps:
       - uses: actions/checkout@v7
 
@@ -26,8 +29,17 @@ jobs:
           node-version: 26
           cache: npm
 
+      # package-lock.json が変わらない限り、node_modules をそのまま使い回して npm ci を省く
+      - name: 依存パッケージのキャッシュ
+        id: modules
+        uses: actions/cache@v6
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ runner.arch }}-node26-${{ hashFiles('package-lock.json') }}
+
       - name: 依存パッケージを入れる
-        run: npm ci
+        if: steps.modules.outputs.cache-hit != 'true'
+        run: npm ci --prefer-offline --no-audit --no-fund
 
       - name: 型チェック
         run: npm run typecheck
@@ -38,11 +50,36 @@ jobs:
       - name: テスト
         run: npm test
 
+      # 変換結果は中身のハッシュで引かれるので、古いキャッシュを引き継いでも安全
+      - name: Web ビルドのキャッシュ
+        uses: actions/cache@v6
+        with:
+          path: ${{ runner.temp }}/metro-cache
+          key: metro-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ github.sha }}
+          restore-keys: metro-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+
       - name: Web 向けに書き出す
         run: npm run build:web
 
+      - name: Playwright のバージョンを調べる
+        id: playwright
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: E2E 用のブラウザのキャッシュ
+        id: browsers
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+
+      # ブラウザ本体はキャッシュにあれば取得を省く。OS 側の依存パッケージは毎回入れる
       - name: E2E 用のブラウザを入れる
+        if: steps.browsers.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
+
+      - name: E2E 用の OS 側の依存パッケージを入れる
+        if: steps.browsers.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       - name: E2E テスト
         run: npx playwright test

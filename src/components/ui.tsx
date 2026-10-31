@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { MaxContentWidth, Spacing } from '@/constants/theme'
 import { useTheme } from '@/hooks/use-theme'
+import { useMailStore } from '@/state/mail-store'
 
 /**
  * 画面全体の入れ物。セーフエリアを避け、Web の広い画面ではスマホ幅に収める。
@@ -90,10 +91,13 @@ export const Avatar = ({ name, size = 40 }: { name: string, size?: number }) => 
  */
 export const ConceptNotice = () => {
   const theme = useTheme()
+  const { source } = useMailStore()
+  let text = '非公式のデザインコンセプト・Google とは無関係・データはダミー'
+  if (source === 'gmail') text = '非公式のデザインコンセプト・Google とは無関係・実際の受信トレイを読み取り専用で表示中'
   return (
     <View style={[styles.notice, { backgroundColor: theme.surfaceSelected }]} accessibilityRole="text">
       <Text style={[styles.noticeText, { color: theme.textSecondary }]}>
-        非公式のデザインコンセプト・Google とは無関係・データはダミー
+        {text}
       </Text>
     </View>
   )

@@ -2,6 +2,7 @@ import { Link } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 
+import { GmailConnectBar, GmailPanel } from '@/components/gmail-panel'
 import { MailRow } from '@/components/mail-row'
 import { Avatar, ConceptNotice, IconButton, Screen } from '@/components/ui'
 import { Spacing } from '@/constants/theme'
@@ -72,7 +73,9 @@ const EmptyState = ({ query, filter, onReset }: { query: string, filter: FilterK
  */
 const InboxScreen = () => {
   const theme = useTheme()
-  const { mails, toggleStar, archive, showSnack } = useMailStore()
+  const { mails, toggleStar, archive, showSnack, source, gmailAddress, gmailStatus } = useMailStore()
+  const [panelOpen, setPanelOpen] = useState(false)
+  const accountAddress = gmailAddress ?? accounts[0].address
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<FilterKey>('all')
 
@@ -103,12 +106,14 @@ const InboxScreen = () => {
         </View>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`アカウント: ${accounts[0].address}`}
-          onPress={() => showSnack(`表示中のアカウント: ${accounts[0].address}`)}
+          accessibilityLabel={`アカウント: ${accountAddress}`}
+          onPress={() => setPanelOpen((open) => !open)}
         >
-          <Avatar name={accounts[0].label} size={36} />
+          <Avatar name={source === 'gmail' ? accountAddress : accounts[0].label} size={36} />
         </Pressable>
       </View>
+      <GmailConnectBar onDetails={() => setPanelOpen((open) => !open)} />
+      {(panelOpen || gmailStatus === 'error') && <GmailPanel onClose={() => setPanelOpen(false)} />}
 
       <View style={[styles.tabs, { borderBottomColor: theme.border }]} accessibilityRole="tablist">
         {filters.map((f) => {

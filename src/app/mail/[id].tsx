@@ -60,7 +60,7 @@ const MissingMail = () => {
  * 戻り値:: ツールバーの要素
  */
 const DetailToolbar = ({ mail }: { mail: Mail }) => {
-  const { archive, remove, setUnread, showSnack } = useMailStore()
+  const { archive, remove, setUnread, showSnack, source } = useMailStore()
 
   /**
    * 操作を実行してから一覧へ戻る処理を作る。
@@ -81,7 +81,7 @@ const DetailToolbar = ({ mail }: { mail: Mail }) => {
         <IconButton glyph="🗑" label="削除" size={20} onPress={thenBack(() => remove(mail.id))} />
         <IconButton glyph="✉" label="未読にする" onPress={thenBack(() => {
           setUnread(mail.id, true)
-          showSnack(`「${mail.subject}」を未読にしました`)
+          if (source !== 'gmail') showSnack(`「${mail.subject}」を未読にしました`)
         })} />
         <IconButton glyph="⋮" label="その他" onPress={() => showSnack('その他の操作はプロトタイプでは未実装です')} />
       </View>
@@ -213,14 +213,15 @@ const ReplyBar = ({ mailId, pickerOpen, onTogglePicker }: ReplyBarProps) => {
 const MailDetailScreen = () => {
   const theme = useTheme()
   const { id } = useLocalSearchParams<{ id: string }>()
-  const { findMail, toggleStar, setUnread, reactions, setReaction } = useMailStore()
+  const { findMail, toggleStar, setUnread, reactions, setReaction, source } = useMailStore()
   const [pickerOpen, setPickerOpen] = useState(false)
   const mail = findMail(id)
   const reaction = reactions[id]
 
   // 開いたメールは既読にする
   useEffect(() => {
-    if (mail?.unread) {
+    // Gmail は読み取り専用なので、開いても Gmail 側の既読は変わらない。画面だけ既読にして食い違わせない
+    if (mail?.unread && source !== 'gmail') {
       setUnread(mail.id, false)
     }
     // 開いた時点で 1 回だけ既読にする（あとで「未読にする」を押した状態を上書きしない）

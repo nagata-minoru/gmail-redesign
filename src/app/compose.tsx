@@ -95,6 +95,7 @@ const useRecipients = (initial: string[]) => {
   return { to, input, error, setError, commit, changeText, blur, removeAddress }
 }
 
+/** useRecipients の戻り値の型 */
 type Recipients = ReturnType<typeof useRecipients>
 
 /**
@@ -248,6 +249,7 @@ const pendingTools = [{
   glyph: 'A', label: '書式', feature: '書式の設定', size: undefined,
 }]
 
+/** ComposeToolbar の props */
 type ComposeToolbarProps = {
   fromAddress: string
   onSend: () => void
@@ -315,6 +317,10 @@ const ComposeScreen = () => {
     body !== draft.body
   )
 
+  /**
+   * 送信ボタンの処理。入力中の宛先を確定し、宛先が正しければデモの送信結果を表示して画面を閉じる。
+   * 宛先の形式が不正、または宛先が空のときは、エラーを表示して画面に留まる。
+   */
   const send = () => {
     const to = recipients.commit()
     if (!to) return
@@ -326,6 +332,11 @@ const ComposeScreen = () => {
     close()
   }
 
+  /**
+   * プロトタイプでは未実装の操作が押されたことを、画面下部の通知で伝える。
+   *
+   * feature:: 未実装の操作の名前
+   */
   const notImplemented = (feature: string) => showSnack(`${feature}はプロトタイプでは未実装です`)
 
   return (

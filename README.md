@@ -106,7 +106,7 @@ Web プロトタイプは GitHub Pages で公開しています: <https://nagata
 | フロントエンド | [Expo](https://expo.dev/)（React Native、Expo Router）。同じコードを Web と iOS／Android で動かせる |
 | 公開先 | GitHub Pages（`main` への push で自動公開、`/gmail-redesign/` 以下）と Cloudflare Workers の静的アセット配信（`wrangler.jsonc`） |
 | テスト | Node 標準のテスト（`node --test`）。画面に依存しない関数（絞り込み・検索、宛先の形式チェック、返信・転送の初期値、取り消しでの並び順の復元）とダミーデータを検証する |
-| CI | GitHub Actions で型チェック・lint・Web ビルドとテスト（`.github/workflows/ci.yml`） |
+| CI | GitHub Actions で型チェック・lint・テスト・Web ビルドを順に実行（`.github/workflows/ci.yml`） |
 | バックエンド | 現在はなし。通知などが必要になった段階で Ruby で用意する予定（Cloudflare 以外に配置） |
 
 ```sh

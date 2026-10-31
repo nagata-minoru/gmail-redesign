@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   check:
-    name: 型チェック・lint・Web ビルド
+    name: 型チェック・lint・テスト・Web ビルド
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -35,23 +35,8 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Web 向けに書き出す
-        run: npm run build:web
-
-  test:
-    name: テスト
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 26
-          cache: npm
-
-      - name: 依存パッケージを入れる
-        run: npm ci
-
       - name: テスト
         run: npm test
+
+      - name: Web 向けに書き出す
+        run: npm run build:web

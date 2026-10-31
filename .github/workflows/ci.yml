@@ -18,9 +18,6 @@ jobs:
     name: 型チェック・lint・テスト・Web ビルド・E2E
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    env:
-      # Expo（Metro）の変換結果の置き場。キャッシュとして次の実行に引き継ぐ
-      EXPO_METRO_CACHE_OUTPUT_DIR: ${{ runner.temp }}/metro-cache
     steps:
       - uses: actions/checkout@v7
 
@@ -49,6 +46,10 @@ jobs:
 
       - name: テスト
         run: npm test
+
+      # Expo（Metro）の変換結果の置き場。ジョブ全体の env では runner コンテキストを使えないので、ここで設定する
+      - name: Web ビルドのキャッシュの置き場を決める
+        run: echo "EXPO_METRO_CACHE_OUTPUT_DIR=$RUNNER_TEMP/metro-cache" >> "$GITHUB_ENV"
 
       # 変換結果は中身のハッシュで引かれるので、古いキャッシュを引き継いでも安全
       - name: Web ビルドのキャッシュ

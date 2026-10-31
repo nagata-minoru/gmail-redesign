@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 
 import { MailRow } from '@/components/mail-row'
-import { Avatar, IconButton, Screen } from '@/components/ui'
+import { Avatar, ConceptNotice, IconButton, Screen } from '@/components/ui'
 import { Spacing } from '@/constants/theme'
 import { accounts, type Mail } from '@/data/mails'
 import { useTheme } from '@/hooks/use-theme'
@@ -117,6 +117,7 @@ const InboxScreen = () => {
 
   return (
     <Screen>
+      <ConceptNotice />
       <View style={styles.header}>
         <IconButton glyph="≡" label="メニュー" onPress={() => showSnack('メニューはプロトタイプでは未実装です')} />
         <View style={[styles.search, { backgroundColor: theme.surface }]}>

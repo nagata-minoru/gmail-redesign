@@ -69,9 +69,10 @@ export const IconButton = ({ glyph, label, onPress, color, size = 22, style }: I
  */
 export const Avatar = ({ name, size = 40 }: { name: string, size?: number }) => {
   const theme = useTheme()
+  const shape = { width: size, height: size, borderRadius: size / 2 }
   return (
     <View
-      style={[styles.avatar, { width: size, height: size, borderRadius: size / 2, backgroundColor: theme.surfaceSelected }]}
+      style={[styles.avatar, shape, { backgroundColor: theme.surfaceSelected }]}
       accessibilityElementsHidden
       importantForAccessibility="no"
     >

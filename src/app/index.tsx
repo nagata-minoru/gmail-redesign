@@ -54,6 +54,20 @@ const matchesQuery = (mail: Mail, query: string) => {
   return [mail.fromName, mail.fromAddress, mail.subject, mail.body].some((s) => s.toLowerCase().includes(q))
 }
 
+/** Empty State の文言（検索・絞り込みで 0 件のときと、受信トレイが空のとき） */
+const emptyMessages = {
+  noResults: {
+    glyph: '🔍',
+    title: '該当するメールはありません',
+    body: '検索語や絞り込みを変えてみてください。',
+  },
+  emptyInbox: {
+    glyph: '☕',
+    title: '受信トレイは空です',
+    body: 'すべて片付きました。新しいメールが届くとここに表示されます。',
+  },
+}
+
 /**
  * 一覧が空のときの表示。状態と、次にできる操作を伝える。
  *
@@ -65,16 +79,19 @@ const matchesQuery = (mail: Mail, query: string) => {
 const EmptyState = ({ query, filter, onReset }: { query: string, filter: FilterKey, onReset: () => void }) => {
   const theme = useTheme()
   const searching = query.trim() !== '' || filter !== 'all'
-  const title = searching ? '該当するメールはありません' : '受信トレイは空です'
-  const body = searching ? '検索語や絞り込みを変えてみてください。' : 'すべて片付きました。新しいメールが届くとここに表示されます。'
+  const { glyph, title, body } = searching ? emptyMessages.noResults : emptyMessages.emptyInbox
 
   return (
     <View style={styles.empty}>
-      <Text style={styles.emptyGlyph} accessibilityElementsHidden importantForAccessibility="no">{searching ? '🔍' : '☕'}</Text>
+      <Text style={styles.emptyGlyph} accessibilityElementsHidden importantForAccessibility="no">{glyph}</Text>
       <Text style={[styles.emptyTitle, { color: theme.text }]}>{title}</Text>
       <Text style={[styles.emptyBody, { color: theme.textSecondary }]}>{body}</Text>
       {searching && (
-        <Pressable accessibilityRole="button" onPress={onReset} style={[styles.emptyButton, { borderColor: theme.border }]}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onReset}
+          style={[styles.emptyButton, { borderColor: theme.border }]}
+        >
           <Text style={{ color: theme.accent, fontWeight: '600' }}>検索と絞り込みを解除</Text>
         </Pressable>
       )}
@@ -113,7 +130,9 @@ const InboxScreen = () => {
             accessibilityLabel="メールを検索"
             returnKeyType="search"
           />
-          {query !== '' && <IconButton glyph="×" label="検索語を消す" size={18} color={theme.textMuted} onPress={() => setQuery('')} />}
+          {query !== '' && (
+            <IconButton glyph="×" label="検索語を消す" size={18} color={theme.textMuted} onPress={() => setQuery('')} />
+          )}
         </View>
         <Pressable
           accessibilityRole="button"
@@ -127,6 +146,10 @@ const InboxScreen = () => {
       <View style={[styles.tabs, { borderBottomColor: theme.border }]} accessibilityRole="tablist">
         {filters.map((f) => {
           const selected = f.key === filter
+          const labelStyle = {
+            color: selected ? theme.accent : theme.textSecondary,
+            fontWeight: selected ? '700' : '400',
+          } as const
           return (
             <Pressable
               key={f.key}
@@ -135,7 +158,7 @@ const InboxScreen = () => {
               onPress={() => setFilter(f.key)}
               style={[styles.tab, selected && { borderBottomColor: theme.accent }]}
             >
-              <Text style={{ color: selected ? theme.accent : theme.textSecondary, fontWeight: selected ? '700' : '400' }}>{f.label}</Text>
+              <Text style={labelStyle}>{f.label}</Text>
             </Pressable>
           )
         })}

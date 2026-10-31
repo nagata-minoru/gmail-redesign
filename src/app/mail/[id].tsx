@@ -227,9 +227,7 @@ const MailDetailScreen = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
-  if (!mail) {
-    return <MissingMail />
-  }
+  if (!mail) return <MissingMail />
   const subjectColor = mail.alert ? theme.alertText : theme.text
 
   return (

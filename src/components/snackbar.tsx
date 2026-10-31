@@ -19,16 +19,12 @@ export const Snackbar = () => {
   const { snack, dismissSnack } = useMailStore()
 
   useEffect(() => {
-    if (!snack) {
-      return
-    }
+    if (!snack) return
     const timer = setTimeout(dismissSnack, AUTO_DISMISS_MS)
     return () => clearTimeout(timer)
   }, [snack, dismissSnack])
 
-  if (!snack) {
-    return null
-  }
+  if (!snack) return null
 
   return (
     <View style={styles.wrapper} pointerEvents="box-none">

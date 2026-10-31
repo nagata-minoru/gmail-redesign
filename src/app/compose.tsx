@@ -21,13 +21,9 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
  * 戻り値:: 初期値（to, subject, body）
  */
 const initialDraft = (mode: ComposeMode, source: Mail | undefined) => {
-  if (!source || mode === 'new') {
-    return { to: [] as string[], subject: '', body: '' }
-  }
+  if (!source || mode === 'new') return { to: [] as string[], subject: '', body: '' }
   const quoted = `\n\n---- ${source.time} ${source.fromName} <${source.fromAddress}> ----\n${source.body}`
-  if (mode === 'forward') {
-    return { to: [] as string[], subject: `Fwd: ${source.subject}`, body: quoted }
-  }
+  if (mode === 'forward') return { to: [] as string[], subject: `Fwd: ${source.subject}`, body: quoted }
   return { to: [source.fromAddress], subject: `Re: ${source.subject}`, body: quoted }
 }
 
@@ -339,9 +335,7 @@ const ComposeScreen = () => {
 
   const send = () => {
     const to = recipients.commit()
-    if (!to) {
-      return
-    }
+    if (!to) return
     if (to.length === 0) {
       recipients.setError('宛先を入力してください')
       return

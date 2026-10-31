@@ -63,16 +63,12 @@ export const MailStoreProvider = ({ children }: { children: ReactNode }) => {
    */
   const takeOut = useCallback((id: string, action: string) => {
     const index = mails.findIndex((m) => m.id === id)
-    if (index < 0) {
-      return
-    }
+    if (index < 0) return
     const mail = mails[index]
     setMails((prev) => prev.filter((m) => m.id !== id))
     showSnack(`「${mail.subject}」を${action}`, () => {
       setMails((prev) => {
-        if (prev.some((m) => m.id === mail.id)) {
-          return prev
-        }
+        if (prev.some((m) => m.id === mail.id)) return prev
         const next = [...prev]
         next.splice(Math.min(index, next.length), 0, mail)
         return next

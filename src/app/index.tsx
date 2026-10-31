@@ -50,9 +50,7 @@ const matchesFilter = (mail: Mail, filter: FilterKey) => {
  */
 const matchesQuery = (mail: Mail, query: string) => {
   const q = query.trim().toLowerCase()
-  if (!q) {
-    return true
-  }
+  if (!q) return true
   return [mail.fromName, mail.fromAddress, mail.subject, mail.body].some((s) => s.toLowerCase().includes(q))
 }
 

@@ -45,7 +45,7 @@
     "typecheck": "tsc --noEmit",
     "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test 'src/**/*.test.ts'",
     "test:e2e": "npm run build:web && playwright test",
-    "build:web": "expo export --platform web && cp 'dist/+not-found.html' dist/404.html",
+    "build:web": "EXPO_NO_DOTENV=1 expo export --platform web && cp 'dist/+not-found.html' dist/404.html",
     "build:pages": "WEB_BASE_URL=/gmail-redesign npm run build:web",
     "preview:web": "npm run build:web && wrangler dev",
     "deploy": "npm run build:web && wrangler deploy"

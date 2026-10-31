@@ -84,13 +84,14 @@ export const Avatar = ({ name, size = 40 }: { name: string, size?: number }) => 
 /**
  * 非公式のコンセプトであることを伝える 1 行の注記。
  * 公開中のプロトタイプを Google の公式機能と誤解されないよう、受信トレイの上端に置く。
+ * 画面の外側（surface）と同じ色だと帯として見えないため、一段濃い surfaceSelected を背景にする。
  *
  * 戻り値:: 注記の要素
  */
 export const ConceptNotice = () => {
   const theme = useTheme()
   return (
-    <View style={[styles.notice, { backgroundColor: theme.surface }]} accessibilityRole="text">
+    <View style={[styles.notice, { backgroundColor: theme.surfaceSelected }]} accessibilityRole="text">
       <Text style={[styles.noticeText, { color: theme.textSecondary }]}>
         非公式のデザインコンセプト・Google とは無関係・データはダミー
       </Text>
@@ -101,7 +102,7 @@ export const ConceptNotice = () => {
 const styles = StyleSheet.create({
   notice: {
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.xs,
+    paddingVertical: Spacing.sm,
   },
   noticeText: {
     fontSize: 12,

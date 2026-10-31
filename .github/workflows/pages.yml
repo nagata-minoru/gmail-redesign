@@ -1,8 +1,8 @@
 name: GitHub Pages
 
+# Gmail 連携の開発に入ったため、main への push では公開しない（AGENTS.md の方針）。
+# 公開サイトはダミーデータ版のまま更新されない。再び公開するときは、連携のコードが含まれないことを確かめて手動で実行する。
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 # 公開は 1 つずつ行う。実行中の公開は途中で取り消さない

@@ -87,7 +87,7 @@
 - ライト／ダークテーマ（端末の設定に従う）
 - 受信トレイの上端に、非公式のコンセプトでデータはダミーであることを示す注記
 
-Web プロトタイプは GitHub Pages で公開しています: <https://nagata-minoru.github.io/gmail-redesign/>
+ダミーデータ版の Web プロトタイプを GitHub Pages で公開しています: <https://nagata-minoru.github.io/gmail-redesign/>。Gmail 連携の開発に入ったため、この公開サイトは更新を止めており、ダミーデータ版の最後の状態のままです。
 
 データはメモリ上のダミーだけで、ページを再読み込みすると初期状態に戻ります。送信もデモで、実際にはどこにも送られません。
 
@@ -104,7 +104,7 @@ Web プロトタイプは GitHub Pages で公開しています: <https://nagata
 | 項目 | 内容 |
 | --- | --- |
 | フロントエンド | [Expo](https://expo.dev/)（React Native、Expo Router）。同じコードを Web と iOS／Android で動かせる |
-| 公開先 | GitHub Pages（`main` への push で自動公開、`/gmail-redesign/` 以下）と Cloudflare Workers の静的アセット配信（`wrangler.jsonc`） |
+| 公開先 | GitHub Pages（`/gmail-redesign/` 以下。Gmail 連携の開発中は自動公開を止め、手動実行のみ）と Cloudflare Workers の静的アセット配信（`wrangler.jsonc`） |
 | テスト | Node 標準のテスト（`node --test`）。画面に依存しない関数（絞り込み・検索、宛先の形式チェック、返信・転送の初期値、取り消しでの並び順の復元）とダミーデータを検証する |
 | E2E テスト | [Playwright](https://playwright.dev/)（Chromium、Pixel 7 の画面サイズ）。書き出した Web 版を実際にブラウザで操作し、絞り込み・検索、メール詳細、アーカイブと取り消し、メール作成（宛先の形式チェック、差出人の切り替え、破棄の確認、返信）を確認する |
 | CI | GitHub Actions で型チェック・lint・テスト・Web ビルド・E2E テストを順に実行。依存パッケージ・Web ビルドの変換結果・E2E 用のブラウザはキャッシュして実行時間を短くする（`.github/workflows/ci.yml`） |
@@ -122,7 +122,7 @@ npm run build:pages  # GitHub Pages 向けに、/gmail-redesign/ 以下で動く
 npm run deploy       # 書き出して Cloudflare に公開する（wrangler へのログインが必要）
 ```
 
-配信するパスは、ビルド時の環境変数 `WEB_BASE_URL` で切り替えます（`app.config.ts`）。GitHub Pages への公開は `.github/workflows/pages.yml` が行います。
+配信するパスは、ビルド時の環境変数 `WEB_BASE_URL` で切り替えます（`app.config.ts`）。GitHub Pages への公開は `.github/workflows/pages.yml` が行いますが、Gmail 連携の開発中は `main` への push では動かず、手動実行のみです。
 
 画面のコードは `src/app/`（`index.tsx` が受信トレイ、`mail/[id].tsx` がメール詳細、`compose.tsx` がメール作成）、ダミーデータは `src/data/mails.ts` にあります。画面に依存しない処理は `src/lib/` に置き、テストを隣に置いています。E2E テストは `e2e/` にあります。スワイプ操作、ダークテーマの見た目、iOS／Android 実機での動作のテストは未整備です。
 

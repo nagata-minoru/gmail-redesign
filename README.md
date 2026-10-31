@@ -101,7 +101,8 @@
 | 項目 | 内容 |
 | --- | --- |
 | フロントエンド | [Expo](https://expo.dev/)（React Native、Expo Router）。同じコードを Web と iOS／Android で動かせる |
-| 公開先 | Cloudflare Workers の静的アセット配信（`wrangler.jsonc`） |
+| 公開先 | GitHub Pages（`main` への push で自動公開、`/gmail-redesign/` 以下）と Cloudflare Workers の静的アセット配信（`wrangler.jsonc`） |
+| CI | GitHub Actions で型チェック・lint・Web ビルド（`.github/workflows/ci.yml`） |
 | バックエンド | 現在はなし。通知などが必要になった段階で Ruby で用意する予定（Cloudflare 以外に配置） |
 
 ```sh
@@ -109,9 +110,12 @@ npm install          # 依存パッケージを入れる
 npm run web          # 開発サーバを起動してブラウザで開く
 npm run typecheck    # 型チェック
 npm run lint         # ESLint
-npm run build:web    # dist/ に静的ファイルを書き出す
+npm run build:web    # dist/ に静的ファイルを書き出す（ルートで配信する場合）
+npm run build:pages  # GitHub Pages 向けに、/gmail-redesign/ 以下で動くよう書き出す
 npm run deploy       # 書き出して Cloudflare に公開する（wrangler へのログインが必要）
 ```
+
+配信するパスは、ビルド時の環境変数 `WEB_BASE_URL` で切り替えます（`app.config.ts`）。GitHub Pages への公開は `.github/workflows/pages.yml` が行います。
 
 画面のコードは `src/app/`（`index.tsx` が受信トレイ、`mail/[id].tsx` がメール詳細、`compose.tsx` がメール作成）、ダミーデータは `src/data/mails.ts` にあります。
 
@@ -123,6 +127,7 @@ npm run deploy       # 書き出して Cloudflare に公開する（wrangler へ
 - [ ] スター、スワイプ、重要度表示の操作ルールを定義する
 - [ ] ライト／ダークテーマと Empty State のビジュアルを検討する
 - [x] 主要な画面遷移を含む操作可能なプロトタイプを作成する（Web、ダミーデータ）
+- [ ] Web プロトタイプを GitHub Pages で公開する
 - [ ] Web プロトタイプを Cloudflare で公開する
 - [ ] ユーザーテストを通じて情報階層と操作の分かりやすさを検証する
 

@@ -5,11 +5,10 @@ import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-na
 import { MailRow } from '@/components/mail-row'
 import { Avatar, ConceptNotice, IconButton, Screen } from '@/components/ui'
 import { Spacing } from '@/constants/theme'
-import { accounts, type Mail } from '@/data/mails'
+import { accounts } from '@/data/mails'
 import { useTheme } from '@/hooks/use-theme'
+import { matchesFilter, matchesQuery, type FilterKey } from '@/lib/mail-filter'
 import { useMailStore } from '@/state/mail-store'
-
-type FilterKey = 'all' | 'unread' | 'starred' | 'attachment'
 
 const filters: { key: FilterKey, label: string }[] = [{
   key: 'all', label: 'すべて',
@@ -20,39 +19,6 @@ const filters: { key: FilterKey, label: string }[] = [{
 }, {
   key: 'attachment', label: '添付ファイル',
 }]
-
-/**
- * 絞り込みタブの条件にメールが合うかを判定する。
- *
- * mail:: 判定するメール
- * filter:: 選択中のタブ
- * 戻り値:: 条件に合えば true
- */
-const matchesFilter = (mail: Mail, filter: FilterKey) => {
-  switch (filter) {
-    case 'unread':
-      return mail.unread
-    case 'starred':
-      return mail.starred
-    case 'attachment':
-      return mail.hasAttachment
-    default:
-      return true
-  }
-}
-
-/**
- * 検索語がメールの送信者・件名・本文に含まれるかを判定する。
- *
- * mail:: 判定するメール
- * query:: 検索語（前後の空白は無視）
- * 戻り値:: 含まれていれば true（検索語が空なら常に true）
- */
-const matchesQuery = (mail: Mail, query: string) => {
-  const q = query.trim().toLowerCase()
-  if (!q) return true
-  return [mail.fromName, mail.fromAddress, mail.subject, mail.body].some((s) => s.toLowerCase().includes(q))
-}
 
 /** Empty State の文言（検索・絞り込みで 0 件のときと、受信トレイが空のとき） */
 const emptyMessages = {

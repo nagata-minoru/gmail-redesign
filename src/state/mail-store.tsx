@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react'
 
 import { initialMails, type Mail } from '@/data/mails'
+import { restoreMail } from '@/lib/mail-list'
 
 /** 画面下部に一時表示するお知らせ（取り消し操作付きにできる） */
 export type Snack = {
@@ -67,12 +68,7 @@ export const MailStoreProvider = ({ children }: { children: ReactNode }) => {
     const mail = mails[index]
     setMails((prev) => prev.filter((m) => m.id !== id))
     showSnack(`「${mail.subject}」を${action}`, () => {
-      setMails((prev) => {
-        if (prev.some((m) => m.id === mail.id)) return prev
-        const next = [...prev]
-        next.splice(Math.min(index, next.length), 0, mail)
-        return next
-      })
+      setMails((prev) => restoreMail(prev, mail, index))
     })
   }, [mails, showSnack])
 

@@ -46,10 +46,31 @@ const NAMED_ENTITIES: Record<string, string> = {
  * 戻り値:: 文字参照を戻した文字列
  */
 export const decodeEntities = (text: string) => text.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (whole, body: string) => {
-  if (body.startsWith('#x') || body.startsWith('#X')) return String.fromCodePoint(parseInt(body.slice(2), 16))
-  if (body.startsWith('#')) return String.fromCodePoint(parseInt(body.slice(1), 10))
-  return NAMED_ENTITIES[body.toLowerCase()] ?? whole
+  if (!body.startsWith('#')) return NAMED_ENTITIES[body.toLowerCase()] ?? whole
+  const hex = body[1] === 'x' || body[1] === 'X'
+  const code = hex ? parseInt(body.slice(2), 16) : parseInt(body.slice(1), 10)
+  // 範囲外の値は String.fromCodePoint が例外を投げるため、元の表記のまま残す
+  if (code > 0x10ffff) return whole
+  return String.fromCodePoint(code)
 })
+
+/**
+ * パターンに合う部分を、取り除いた結果に新しく合う部分が現れなくなるまで繰り返し取り除く。
+ * 「<scr<script>ipt>」のように、1 回の置換では消えきらない入れ子の書き方に備える。
+ *
+ * text:: 対象の文字列
+ * pattern:: 取り除くパターン（g フラグ付き）
+ * 戻り値:: 合う部分が残っていない文字列
+ */
+const removeAll = (text: string, pattern: RegExp) => {
+  let current = text
+  let previous
+  do {
+    previous = current
+    current = current.replace(pattern, '')
+  } while (current !== previous)
+  return current
+}
 
 /**
  * HTML メールを、タグのない読みやすい文字列にする。画面には文字列だけを出し、HTML は描画しない。
@@ -58,11 +79,10 @@ export const decodeEntities = (text: string) => text.replace(/&(#x[0-9a-f]+|#\d+
  * 戻り値:: 改行を残したプレーンテキスト
  */
 export const htmlToText = (html: string) => {
-  const withBreaks = html
-    .replace(/<(style|script)[\s\S]*?<\/\1>/gi, '')
+  const withBreaks = removeAll(html, /<(style|script)[\s\S]*?<\/\1>/gi)
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/(p|div|li|tr|h[1-6])>/gi, '\n')
-  return decodeEntities(withBreaks.replace(/<[^>]*>/g, ''))
+  return decodeEntities(removeAll(withBreaks, /<[^>]*>/g))
     .replace(/[ \t]+\n/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim()

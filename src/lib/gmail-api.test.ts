@@ -57,6 +57,19 @@ describe('decodeEntities / htmlToText', () => {
     const html = '<style>p{}</style><p>1行目</p><script>x()</script><div>2行目<br>3行目</div>'
     assert.equal(htmlToText(html), '1行目\n2行目\n3行目')
   })
+
+  it('範囲外の数値文字参照は例外にせず、そのままにする', () => {
+    assert.equal(decodeEntities('x&#99999999;y&#x110000;'), 'x&#99999999;y&#x110000;')
+  })
+
+  it('入れ子にしたタグを 1 回で消えきらない形にしても、タグを残さない', () => {
+    assert.equal(htmlToText('<scr<script>x</script>ipt>本文'), '本文')
+    assert.ok(!htmlToText('<s<b>cript>alert(1)</b>').includes('<'))
+  })
+
+  it('文字参照で書かれた < > は本文の文字として残す', () => {
+    assert.equal(htmlToText('<p>1 &lt; 2</p>'), '1 < 2')
+  })
 })
 
 describe('parseFrom', () => {

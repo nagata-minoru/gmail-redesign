@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   check:
-    name: 型チェック・lint・テスト・Web ビルド
+    name: 型チェック・lint・テスト・Web ビルド・E2E
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -40,3 +40,9 @@ jobs:
 
       - name: Web 向けに書き出す
         run: npm run build:web
+
+      - name: E2E 用のブラウザを入れる
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E テスト
+        run: npx playwright test

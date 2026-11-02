@@ -2,7 +2,7 @@
 
 手書きスケッチを出発点にした、Gmail モバイル UI の再設計コンセプトです。メールを「見つける・読む・返信する」という基本操作に集中できるよう、画面構成と操作の優先順位を見直します。
 
-> ダミーデータで動く Web プロトタイプを[公開](https://nagata-minoru.github.io/gmail-redesign/)していますが、実際のメールは扱えません。Google の公式機能ではありません。
+> ダミーデータで動く Web プロトタイプを[公開](https://gmail-redesign.nagata-cc5.workers.dev/)していますが、公開版では実際のメールは扱えません。Google の公式機能ではありません。
 
 ## 概要
 
@@ -88,7 +88,9 @@
 - 受信トレイの上端に、非公式のコンセプトでデータはダミーであることを示す注記
 - ローカルでの Gmail 読み取り（Web のみ・読み取り専用）：受信トレイ上部の帯の「Gmail を読む」で接続し、受信トレイの新しい 20 件を表示する（[Gmail を読む](#gmail-を読むローカル開発)）。同意画面は初回だけで、再読み込み後は 1 回押すだけでつながる。帯の「詳細」またはアカウントのアイコンで、権限の説明と接続の解除を開く。接続中は注記が「実際の受信トレイを読み取り専用で表示中」に変わり、スター・アーカイブ・削除・未読・リアクションは Gmail に反映されない旨を通知して画面も変えない
 
-ダミーデータ版の Web プロトタイプを GitHub Pages で公開しています: <https://nagata-minoru.github.io/gmail-redesign/>。Gmail 連携の開発に入ったため、この公開サイトは更新を止めており、ダミーデータ版の最後の状態のままです。
+ダミーデータ版の Web プロトタイプを Cloudflare Workers で公開しています: <https://gmail-redesign.nagata-cc5.workers.dev/>。公開版はクライアント ID を含めずに書き出すため、Gmail への接続の帯は出ず、ダミーデータだけで動きます。
+
+以前の公開先の GitHub Pages（<https://nagata-minoru.github.io/gmail-redesign/>）は、Gmail 連携の開発に入ったときに更新を止めており、古い状態のままです。
 
 データはメモリ上のダミーだけで、ページを再読み込みすると初期状態に戻ります。送信もデモで、実際にはどこにも送られません。
 
@@ -106,7 +108,7 @@
 | 項目 | 内容 |
 | --- | --- |
 | フロントエンド | [Expo](https://expo.dev/)（React Native、Expo Router）。同じコードを Web と iOS／Android で動かせる |
-| 公開先 | GitHub Pages（`/gmail-redesign/` 以下。Gmail 連携の開発中は自動公開を止め、手動実行のみ）と Cloudflare Workers の静的アセット配信（`wrangler.jsonc`） |
+| 公開先 | Cloudflare Workers の静的アセット配信（`wrangler.jsonc`、`npm run deploy` で手動公開）。GitHub Pages（`/gmail-redesign/` 以下）は自動公開を止め、手動実行のみ |
 | テスト | Node 標準のテスト（`node --test`）。画面に依存しない関数（Gmail 応答の変換、絞り込み・検索、宛先の形式チェック、返信・転送の初期値、取り消しでの並び順の復元）とダミーデータを検証する |
 | E2E テスト | [Playwright](https://playwright.dev/)（Chromium、Pixel 7 の画面サイズ）。書き出した Web 版を実際にブラウザで操作し、絞り込み・検索、メール詳細、アーカイブと取り消し、メール作成（宛先の形式チェック、差出人の切り替え、破棄の確認、返信）を確認する |
 | CI | GitHub Actions で型チェック・lint・テスト・Web ビルド・E2E テストを順に実行。依存パッケージ・Web ビルドの変換結果・E2E 用のブラウザはキャッシュして実行時間を短くする（`.github/workflows/ci.yml`） |
@@ -159,7 +161,7 @@ Google Identity Services のトークン方式で、ブラウザだけで完結�
 - [x] 主要な画面遷移を含む操作可能なプロトタイプを作成する（Web、ダミーデータ）
 - [x] Web プロトタイプを GitHub Pages で公開する
 - [x] ローカルで Gmail を読み取り専用で表示する（Web、トークンはメモリのみ）
-- [ ] Web プロトタイプを Cloudflare で公開する
+- [x] Web プロトタイプを Cloudflare で公開する（ダミーデータのみ）
 - [ ] ユーザーテストを通じて情報階層と操作の分かりやすさを検証する
 
 ## 注意事項

@@ -1,8 +1,8 @@
-import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
 import { initialMails, type Mail } from '@/data/mails'
 import { describeError, fetchAddress, fetchInbox } from '@/lib/gmail-api'
-import { connect, disconnect, isGmailSupported } from '@/lib/gmail-auth'
+import { connect, disconnect, isGmailSupported, restoreToken } from '@/lib/gmail-auth'
 import { restoreMail } from '@/lib/mail-list'
 
 /** 画面下部に一時表示するお知らせ（取り消し操作付きにできる） */
@@ -68,15 +68,17 @@ export const MailStoreProvider = ({ children }: { children: ReactNode }) => {
   const dismissSnack = useCallback(() => setSnack(null), [])
 
   /**
-   * Gmail の受信トレイを読み取り専用で取得して表示する。トークンはメモリにだけ保持する。
-   * 失敗したときはダミーデータのまま、理由を gmailError に入れる。
+   * トークンを得て、Gmail の受信トレイを読み取り専用で取得して表示する。
+   * 失敗したときはトークンを捨ててダミーデータのまま、理由を gmailError に入れる。
+   *
+   * getToken:: トークンを得る処理
+   * 戻り値:: 終わると解決する Promise
    */
-  const connectGmail = useCallback(async () => {
-    if (!isGmailSupported()) return
+  const loadGmail = useCallback(async (getToken: () => Promise<string>) => {
     setGmailStatus('loading')
     setGmailError(null)
     try {
-      const token = await connect()
+      const token = await getToken()
       const [address, inbox] = await Promise.all([fetchAddress(token), fetchInbox(token)])
       setMails(inbox)
       setGmailAddress(address)
@@ -89,7 +91,23 @@ export const MailStoreProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [])
 
-  /** 接続を解除する。メモリのトークンを捨てて Google 側でも失効させ、読み込んだメールを消してダミーに戻す */
+  /** ポップアップで接続し、受信トレイを表示する。ボタンを押したときだけ呼ぶ */
+  const connectGmail = useCallback(async () => {
+    if (!isGmailSupported()) return
+    await loadGmail(connect)
+  }, [loadGmail])
+
+  // 再読み込みの前に接続していたら、sessionStorage の期限内のトークンでつなぎ直す（ポップアップは開かない）。
+  // 静的書き出しの HTML と食い違わないよう、読み込み（hydration）の後で、外部の保存先から状態を取り戻す
+  useEffect(() => {
+    const token = isGmailSupported() ? restoreToken() : null
+    if (token) queueMicrotask(() => loadGmail(async () => token))
+  }, [loadGmail])
+
+  /**
+   * 接続を解除する。メモリと sessionStorage のトークンを捨てて Google 側でも失効させ、
+   * 読み込んだメールを消してダミーに戻す。
+   */
   const disconnectGmail = useCallback(async () => {
     await disconnect()
     setMails(initialMails)

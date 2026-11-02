@@ -49,8 +49,8 @@ export const GmailPanel = ({ onClose }: { onClose: () => void }) => {
       </Text>
       <Text style={[styles.body, mutedColor]}>
         読み取り専用（gmail.readonly）で受信トレイの新しい 20 件だけを読みます。送信・削除・アーカイブ・スター・
-        既読の変更は Gmail に反映されません。アクセストークンはこのタブのメモリにだけ置き、ディスクには保存しません。
-        タブを閉じるか接続を解除すると消えます。
+        既読の変更は Gmail に反映されません。アクセストークンは再読み込みに備えて、このタブの sessionStorage に
+        約 1 時間の期限付きで置きます。タブを閉じるか、期限が切れるか、接続を解除すると消えます。
       </Text>
       {gmailError && (
         <Text style={[styles.body, { color: theme.alertText }]} accessibilityRole="alert">{gmailError}</Text>
@@ -75,6 +75,7 @@ export const GmailPanel = ({ onClose }: { onClose: () => void }) => {
 
 /**
  * 受信トレイの上に常に出す、Gmail 接続の帯。どこを押せば接続できるかを示し、1 回押すだけで接続する。
+ * 接続中は「読むのをやめる」で、1 回押すだけで接続を解除してダミーに戻す。
  * クライアント ID が未設定の環境（公開中のダミー版など）や Web 以外では何も出さない。
  *
  * onDetails:: 説明・解除のパネルを開く処理
@@ -82,7 +83,7 @@ export const GmailPanel = ({ onClose }: { onClose: () => void }) => {
  */
 export const GmailConnectBar = ({ onDetails }: { onDetails: () => void }) => {
   const theme = useTheme()
-  const { source, gmailAddress, gmailStatus, connectGmail } = useMailStore()
+  const { source, gmailAddress, gmailStatus, connectGmail, disconnectGmail } = useMailStore()
   const supported = useGmailSupported()
   if (!supported || !clientId()) return null
   const connected = source === 'gmail'
@@ -113,6 +114,7 @@ export const GmailConnectBar = ({ onDetails }: { onDetails: () => void }) => {
     <View style={[styles.bar, { borderBottomColor: theme.border }]}>
       <Text style={[styles.barText, { color: theme.textSecondary }]} numberOfLines={1}>{label}</Text>
       {!connected && barButton(loading ? '接続中…' : 'Gmail を読む', connectGmail, loading)}
+      {connected && barButton('読むのをやめる', disconnectGmail)}
       {barButton('詳細', onDetails)}
     </View>
   )

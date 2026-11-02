@@ -34,7 +34,7 @@
     "eslint": "^9.0.0",
     "eslint-config-expo": "~58.0.4",
     "typescript": "~6.0.3",
-    "wrangler": "^4.156.0"
+    "wrangler": "^4.156.1"
   },
   "scripts": {
     "start": "expo start",

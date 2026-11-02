@@ -2,7 +2,7 @@
 
 手書きスケッチを出発点にした、Gmail モバイル UI の再設計コンセプトです。メールを「見つける・読む・返信する」という基本操作に集中できるよう、画面構成と操作の優先順位を見直します。
 
-> ダミーデータで動く Web プロトタイプを[公開](https://gmail-redesign.nagata-cc5.workers.dev/)していますが、公開版では実際のメールは扱えません。Google の公式機能ではありません。
+> Web プロトタイプを[公開](https://gmail-redesign.nagata-cc5.workers.dev/)しています。普段はダミーデータで動き、Gmail に読み取り専用でつなげるのは、Google Cloud でテストユーザーに登録したアカウントだけです。Google の公式機能ではありません。
 
 ## 概要
 
@@ -86,9 +86,9 @@
 - アーカイブ・削除の結果を画面下部に表示し、「元に戻す」で取り消せる
 - ライト／ダークテーマ（端末の設定に従う）
 - 受信トレイの上端に、非公式のコンセプトでデータはダミーであることを示す注記
-- ローカルでの Gmail 読み取り（Web のみ・読み取り専用）：受信トレイ上部の帯の「Gmail を読む」で接続し、受信トレイの新しい 20 件を表示する（[Gmail を読む](#gmail-を読むローカル開発)）。同意画面は初回だけで、再読み込み後は 1 回押すだけでつながる。帯の「詳細」またはアカウントのアイコンで、権限の説明と接続の解除を開く。接続中は注記が「実際の受信トレイを読み取り専用で表示中」に変わり、スター・アーカイブ・削除・未読・リアクションは Gmail に反映されない旨を通知して画面も変えない
+- Gmail 読み取り（Web のみ・読み取り専用。ローカルと公開版）：受信トレイ上部の帯の「Gmail を読む」で接続し、受信トレイの新しい 20 件を表示する（[Gmail を読む](#gmail-を読む)）。同意画面は初回だけで、再読み込み後は 1 回押すだけでつながる。帯の「詳細」またはアカウントのアイコンで、権限の説明と接続の解除を開く。接続中は注記が「実際の受信トレイを読み取り専用で表示中」に変わり、スター・アーカイブ・削除・未読・リアクションは Gmail に反映されない旨を通知して画面も変えない
 
-ダミーデータ版の Web プロトタイプを Cloudflare Workers で公開しています: <https://gmail-redesign.nagata-cc5.workers.dev/>。公開版はクライアント ID を含めずに書き出すため、Gmail への接続の帯は出ず、ダミーデータだけで動きます。
+Web プロトタイプを Cloudflare Workers で公開しています: <https://gmail-redesign.nagata-cc5.workers.dev/>。公開版は Gmail への接続の帯を出しますが、Google の OAuth 同意画面を「テスト」状態にしているため、接続できるのはテストユーザーに登録したアカウントだけです。それ以外の人はダミーデータで操作できます。
 
 以前の公開先の GitHub Pages（<https://nagata-minoru.github.io/gmail-redesign/>）は、Gmail 連携の開発に入ったときに更新を止めており、古い状態のままです。
 
@@ -108,7 +108,7 @@
 | 項目 | 内容 |
 | --- | --- |
 | フロントエンド | [Expo](https://expo.dev/)（React Native、Expo Router）。同じコードを Web と iOS／Android で動かせる |
-| 公開先 | Cloudflare Workers の静的アセット配信（`wrangler.jsonc`、`npm run deploy` で手動公開）。GitHub Pages（`/gmail-redesign/` 以下）は自動公開を止め、手動実行のみ |
+| 公開先 | Cloudflare Workers の静的アセット配信（`wrangler.jsonc`、`npm run deploy` で手動公開）。CSP などのセキュリティヘッダーは `public/_headers` で付ける。GitHub Pages（`/gmail-redesign/` 以下）は自動公開を止め、手動実行のみ |
 | テスト | Node 標準のテスト（`node --test`）。画面に依存しない関数（Gmail 応答の変換、絞り込み・検索、宛先の形式チェック、返信・転送の初期値、取り消しでの並び順の復元）とダミーデータを検証する |
 | E2E テスト | [Playwright](https://playwright.dev/)（Chromium、Pixel 7 の画面サイズ）。書き出した Web 版を実際にブラウザで操作し、絞り込み・検索、メール詳細、アーカイブと取り消し、メール作成（宛先の形式チェック、差出人の切り替え、破棄の確認、返信）を確認する |
 | CI | GitHub Actions で型チェック・lint・テスト・Web ビルド・E2E テストを順に実行。依存パッケージ・Web ビルドの変換結果・E2E 用のブラウザはキャッシュして実行時間を短くする（`.github/workflows/ci.yml`） |
@@ -121,14 +121,17 @@ npm run typecheck    # 型チェック
 npm run lint         # ESLint
 npm test             # テスト（src/ 以下の *.test.ts）
 npm run test:e2e     # Web 版を書き出して E2E テスト（初回は npx playwright install chromium が必要）
-npm run build:web    # dist/ に静的ファイルを書き出す（ルートで配信する場合）
+npm run build:web    # dist/ に静的ファイルを書き出す（クライアント ID なし。E2E 用）
+npm run build:web:gmail  # .env.local のクライアント ID を入れて書き出し、公開前の確認をする
 npm run build:pages  # GitHub Pages 向けに、/gmail-redesign/ 以下で動くよう書き出す
-npm run deploy       # 書き出して Cloudflare に公開する（wrangler へのログインが必要）
+npm run preview:web  # 公開版を書き出して、wrangler dev で手元に配信する（ヘッダーも同じ）
+npm run deploy       # 公開版を書き出して Cloudflare に公開する（wrangler へのログインが必要）
+npm run deploy:demo  # クライアント ID なし（ダミーデータのみ）で公開する
 ```
 
 配信するパスは、ビルド時の環境変数 `WEB_BASE_URL` で切り替えます（`app.config.ts`）。GitHub Pages への公開は `.github/workflows/pages.yml` が行いますが、Gmail 連携の開発中は `main` への push では動かず、手動実行のみです。
 
-### Gmail を読む（ローカル開発）
+### Gmail を読む
 
 Google Identity Services のトークン方式で、ブラウザだけで完結します。サーバーもクライアントシークレットも使いません。
 
@@ -141,13 +144,26 @@ Google Identity Services のトークン方式で、ブラウザだけで完結�
 
 1. Google Cloud Console でプロジェクトを作り、Gmail API を有効にする
 2. OAuth 同意画面を「テスト」状態で作り、テストユーザーに自分のアカウントを追加する
-3. 「ウェブ アプリケーション」の OAuth クライアント ID を作り、承認済みの JavaScript 生成元に `http://localhost:8081` を追加する
+3. 「ウェブ アプリケーション」の OAuth クライアント ID を作り、承認済みの JavaScript 生成元に `http://localhost:8081` を追加する。公開版でも使うなら `https://gmail-redesign.nagata-cc5.workers.dev` も追加する（それ以外は追加しない）
 4. `.env.example` を `.env.local` にコピーし、`EXPO_PUBLIC_GOOGLE_CLIENT_ID` にクライアント ID を入れる
 5. `npm run web` で起動し、受信トレイ上部の帯の「Gmail を読む」を押す
 
 トークンを保存しないため、ページを再読み込みすると接続は切れます。もう一度「Gmail を読む」を押してください（同意済みならポップアップはすぐ閉じます）。
 
-`npm run build:web`（E2E・Cloudflare・GitHub Pages 向けの書き出し）は `.env.local` を読みません（`EXPO_NO_DOTENV=1`）。公開する版にはクライアント ID が入らず、接続の帯も出ません。
+`npm run build:web`（E2E・GitHub Pages 向けの書き出し）は `.env.local` を読みません（`EXPO_NO_DOTENV=1`）。この版にはクライアント ID が入らず、接続の帯も出ません。
+
+公開版（`npm run deploy`）は `.env.local` のクライアント ID を入れて書き出します。公開版の安全のために次のことをしています。
+
+- `public/_headers` で CSP を付け、読み込めるスクリプトと通信先を自分自身と Google（`accounts.google.com`・`gmail.googleapis.com`・`oauth2.googleapis.com`）だけに絞る。万一ページに不正なスクリプトが入っても、トークンを外部へ送りにくくする
+- 他のサイトへの埋め込み（`frame-ancestors 'none'`）、リファラーの送信、不要なブラウザ機能を止める
+- 書き出しのあと `scripts/check-public-build.mjs` で、クライアント ID が入っていること、CSP があること、Expo が HTML に埋め込むインラインスクリプトのハッシュが CSP に入っていることを確かめる。Expo の更新でハッシュが変わったときは、表示されたハッシュを `public/_headers` に足す
+
+公開版を使うときの注意:
+
+- OAuth 同意画面は「テスト」のままにし、テストユーザーは自分だけにする。他の人にも使ってもらうには、Google の審査と、制限付きスコープ向けのセキュリティ評価（CASA）が必要になる
+- 接続時に「確認されていないアプリ」という警告が出るのは、テスト状態のため
+- Cloudflare アカウントが乗っ取られると、偽のコードを公開されてトークンを抜かれるおそれがある。Cloudflare の 2 段階認証を有効にしておく
+- 共用の PC では、Google にログインしたままだと他の人もボタン 1 回でつながる。使い終わったら「接続を解除」し、Google からもログアウトする
 
 画面のコードは `src/app/`（`index.tsx` が受信トレイ、`mail/[id].tsx` がメール詳細、`compose.tsx` がメール作成）、ダミーデータは `src/data/mails.ts` にあります。画面に依存しない処理は `src/lib/` に置き、テストを隣に置いています。E2E テストは `e2e/` にあります。スワイプ操作、ダークテーマの見た目、iOS／Android 実機での動作のテストは未整備です。
 
@@ -161,7 +177,8 @@ Google Identity Services のトークン方式で、ブラウザだけで完結�
 - [x] 主要な画面遷移を含む操作可能なプロトタイプを作成する（Web、ダミーデータ）
 - [x] Web プロトタイプを GitHub Pages で公開する
 - [x] ローカルで Gmail を読み取り専用で表示する（Web、トークンはメモリのみ）
-- [x] Web プロトタイプを Cloudflare で公開する（ダミーデータのみ）
+- [x] Web プロトタイプを Cloudflare で公開する
+- [ ] 公開版で Gmail を読み取り専用で表示する（テストユーザーのみ。本番の URL での動作確認待ち）
 - [ ] ユーザーテストを通じて情報階層と操作の分かりやすさを検証する
 
 ## 注意事項

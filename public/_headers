@@ -1,0 +1,11 @@
+# Cloudflare Workers の静的アセット配信が、すべての応答に付けるセキュリティヘッダー。
+# アクセストークンを扱うため、読み込めるスクリプトと通信先を自分自身と Google だけに絞る。
+# script-src のハッシュは、Expo が各 HTML に埋め込むインラインスクリプト
+#   globalThis.__EXPO_ROUTER_HYDRATE__=true;
+# のもの。Expo の更新で中身が変わったら、README の手順でハッシュを計算し直す。
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-67fhrP0+BkBqmgGGXTtgiVO/9EQs3QruYNU/7fnRkI8=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; connect-src 'self' https://gmail.googleapis.com https://oauth2.googleapis.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; img-src 'self' data:; font-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  Cross-Origin-Opener-Policy: same-origin-allow-popups
+  Referrer-Policy: no-referrer
+  X-Content-Type-Options: nosniff
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()

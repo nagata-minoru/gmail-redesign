@@ -45,10 +45,13 @@
     "typecheck": "tsc --noEmit",
     "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test 'src/**/*.test.ts'",
     "test:e2e": "npm run build:web && playwright test",
-    "build:web": "EXPO_NO_DOTENV=1 expo export --platform web && cp 'dist/+not-found.html' dist/404.html",
+    "export:web": "expo export --platform web && cp 'dist/+not-found.html' dist/404.html",
+    "build:web": "EXPO_NO_DOTENV=1 npm run export:web",
+    "build:web:gmail": "npm run export:web && node scripts/check-public-build.mjs",
     "build:pages": "WEB_BASE_URL=/gmail-redesign npm run build:web",
-    "preview:web": "npm run build:web && wrangler dev",
-    "deploy": "npm run build:web && wrangler deploy"
+    "preview:web": "npm run build:web:gmail && wrangler dev",
+    "deploy": "npm run build:web:gmail && wrangler deploy",
+    "deploy:demo": "npm run build:web && wrangler deploy"
   },
   "private": true
 }

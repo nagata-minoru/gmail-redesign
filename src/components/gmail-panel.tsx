@@ -2,7 +2,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { Spacing } from '@/constants/theme'
 import { useTheme } from '@/hooks/use-theme'
-import { clientId, isGmailSupported } from '@/lib/gmail-auth'
+import { useGmailSupported } from '@/hooks/use-gmail-supported'
+import { clientId } from '@/lib/gmail-auth'
 import { useMailStore } from '@/state/mail-store'
 
 /**
@@ -15,6 +16,7 @@ import { useMailStore } from '@/state/mail-store'
 export const GmailPanel = ({ onClose }: { onClose: () => void }) => {
   const theme = useTheme()
   const { source, gmailAddress, gmailStatus, gmailError, connectGmail, disconnectGmail } = useMailStore()
+  const supported = useGmailSupported()
   const loading = gmailStatus === 'loading'
   const connected = source === 'gmail'
   const textColor = { color: theme.text }
@@ -53,16 +55,16 @@ export const GmailPanel = ({ onClose }: { onClose: () => void }) => {
       {gmailError && (
         <Text style={[styles.body, { color: theme.alertText }]} accessibilityRole="alert">{gmailError}</Text>
       )}
-      {!isGmailSupported() && (
+      {!supported && (
         <Text style={[styles.body, mutedColor]}>Gmail への接続は Web 版のみ対応しています。</Text>
       )}
-      {isGmailSupported() && !clientId() && (
+      {supported && !clientId() && (
         <Text style={[styles.body, mutedColor]}>
           クライアント ID が未設定です。README の手順で .env.local に EXPO_PUBLIC_GOOGLE_CLIENT_ID を設定してください。
         </Text>
       )}
       <View style={styles.actions}>
-        {isGmailSupported() && !!clientId() && !connected &&
+        {supported && !!clientId() && !connected &&
           button(loading ? '接続中…' : 'Gmail に接続（読み取り専用）', connectGmail, loading)}
         {connected && button('接続を解除してダミーに戻す', disconnectGmail)}
         {button('閉じる', onClose)}
@@ -81,7 +83,8 @@ export const GmailPanel = ({ onClose }: { onClose: () => void }) => {
 export const GmailConnectBar = ({ onDetails }: { onDetails: () => void }) => {
   const theme = useTheme()
   const { source, gmailAddress, gmailStatus, connectGmail } = useMailStore()
-  if (!isGmailSupported() || !clientId()) return null
+  const supported = useGmailSupported()
+  if (!supported || !clientId()) return null
   const connected = source === 'gmail'
   const loading = gmailStatus === 'loading'
   const label = connected ? `Gmail: ${gmailAddress}（読み取り専用）` : 'ダミーデータを表示中'

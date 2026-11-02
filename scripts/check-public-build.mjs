@@ -8,6 +8,8 @@ import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 
 const DIST = 'dist'
+/** Google の OAuth クライアント ID の形（数字-英数字.apps.googleusercontent.com） */
+const CLIENT_ID_PATTERN = /\b\d+-[a-z0-9]+\.apps\.googleusercontent\.com\b/
 
 /**
  * ディレクトリ以下のファイルを再帰的に列挙する。
@@ -33,7 +35,7 @@ const fail = (message) => {
 
 const files = listFiles(DIST)
 const scripts = files.filter((f) => f.endsWith('.js')).map((f) => readFileSync(f, 'utf8'))
-if (!scripts.some((s) => s.includes('.apps.googleusercontent.com'))) {
+if (!scripts.some((s) => CLIENT_ID_PATTERN.test(s))) {
   fail('クライアント ID が埋め込まれていません。.env.local に EXPO_PUBLIC_GOOGLE_CLIENT_ID を設定してください。')
 }
 
